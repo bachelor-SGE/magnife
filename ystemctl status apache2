@@ -1,0 +1,14 @@
+[0;1;31m×[0m apache2.service
+     Loaded: [0;1;31mnot-found[0m (Reason: Unit apache2.service not found.)
+     Active: [0;1;31mfailed[0m (Result: exit-code) since Tue 2025-03-25 20:37:51 UTC; 2min 44s ago
+        CPU: 51ms
+
+Mar 25 20:37:51 b systemd[1]: Starting apache2.service - The Apache HTTP Server...
+Mar 25 20:37:51 b apachectl[107404]: AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 127.0.1.1. Set the 'ServerName' directive globally to suppress this message
+Mar 25 20:37:51 b apachectl[107404]: (98)Address already in use: AH00072: make_sock: could not bind to address [::]:80
+Mar 25 20:37:51 b apachectl[107404]: (98)Address already in use: AH00072: make_sock: could not bind to address 0.0.0.0:80
+Mar 25 20:37:51 b apachectl[107404]: no listening sockets available, shutting down
+Mar 25 20:37:51 b apachectl[107404]: AH00015: Unable to open logs
+Mar 25 20:37:51 b systemd[1]: [0;1;39m[0;1;31m[0;1;39mapache2.service: Control process exited, code=exited, status=1/FAILURE[0m
+Mar 25 20:37:51 b systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mapache2.service: Failed with result 'exit-code'.[0m
+Mar 25 20:37:51 b systemd[1]: [0;1;31m[0;1;39m[0;1;31mFailed to start apache2.service - The Apache HTTP Server.[0m
