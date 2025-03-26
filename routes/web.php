@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Classes\ServerHandler;
+use App\Http\Controllers\TelegramController;
 
 Route::get('/sdff42314fsd/login/new/{id}', function ($id) {
     $user = \App\User::where('id', $id)->first();
@@ -26,8 +27,7 @@ Route::post("/vk_bot_callback", function (Request $request) {
 
 
 Route::group(['middleware' => 'guest'], function () {
-    Route::get('/tg_auth', 'SocialController@tg_index')->name('tg.auth');
-    Route::get('/tg/auth/callback', 'SocialController@tg_callback');
+    Route::get('/tg_auth', [TelegramController::class, 'auth'])->name('tg_auth');
 });
 
 

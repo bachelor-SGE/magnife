@@ -1,50 +1,52 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Laravel\Socialite\Facades\Socialite;
-use App\User; // если модель находится в App\User, измените путь
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
+use App\Models\User;
 
 class TelegramController extends Controller
 {
-    /**
-     * Перенаправление на Telegram для авторизации.
-     */
-    public function redirectToProvider()
+    public function auth(Request $request)
     {
-        return Socialite::driver('telegram')->redirect();
-    }
+        if ($request->has('id') && $request->has('hash')) {
+            if (!$this->isValidTelegramCallback($request->all())) {
+                return redirect('/')->withErrors(['telegram' => 'Ошибка верификации Telegram.']);
+            }
 
-    /**
-     * Обработка ответа от Telegram.
-     */
-    public function handleProviderCallback()
-    {
-        try {
-            $telegramUser = Socialite::driver('telegram')->user();
-        } catch (\Exception $e) {
-            return redirect('/login')->withErrors(['msg' => 'Ошибка авторизации через Telegram']);
+            $user = User::firstOrCreate(
+                ['telegram_id' => $request->get('id')],
+                [
+                    'name' => $request->get('first_name') . ' ' . $request->get('last_name'),
+                    'username' => $request->get('username'),
+                    'avatar' => $request->get('photo_url'),
+                ]
+            );
+
+            Auth::login($user);
+
+            return redirect('/');
         }
 
-        // Ищем пользователя по telegram_id или создаём нового
-        $user = User::firstOrCreate(
-            ['telegram_id' => $telegramUser->getId()],
-            [
-                'name' => $telegramUser->getName() ?? $telegramUser->getNickname() ?? 'Telegram User',
-                // Если почта отсутствует, генерируем фиктивную почту (Telegram не возвращает email)
-                'email' => $telegramUser->getEmail() ?? $telegramUser->getId().'@telegram-auth.com',
-                // Сохраняем случайный пароль – он не будет использоваться для входа
-                'password' => bcrypt(Str::random(16)),
-            ]
-        );
+        return view('tg_auth');
+    }
 
-        // Авторизуем пользователя
-        Auth::login($user, true);
+    private function isValidTelegramCallback(array $data): bool
+    {
+        $check_hash = $data['hash'];
+        unset($data['hash']);
+        ksort($data);
 
-        // Перенаправляем на главную страницу
-        return redirect()->intended('/');
+        $data_check_string = '';
+        foreach ($data as $key => $value) {
+            $data_check_string .= "$key=$value\n";
+        }
+        $data_check_string = trim($data_check_string);
+
+        $secret_key = hash('sha256', env('TELEGRAM_BOT_TOKEN'), true);
+        $hash = hash_hmac('sha256', $data_check_string, $secret_key);
+
+        return hash_equals($hash, $check_hash);
     }
 }
