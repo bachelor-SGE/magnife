@@ -5,12 +5,18 @@
     <title>Telegram Login</title>
 </head>
 <body>
-    <script async src="https://telegram.org/js/telegram-widget.js?7"
-        data-telegram-login="magnife_bot"
+@guest
+<script async src="https://telegram.org/js/telegram-widget.js?7"
+        data-telegram-login="{{ env('TELEGRAM_BOT_USERNAME') }}"
         data-size="large"
-        data-auth-url="{{ route('tg_auth') }}"
-        data-request-access="write"
-        data-userpic="true">
-    </script>
+        data-userpic="false"
+        data-auth-url="{{ route('tg.auth') }}"
+        data-request-access="write">
+</script>
+@endguest
+
 </body>
 </html>
+
+
+

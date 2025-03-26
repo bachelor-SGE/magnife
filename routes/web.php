@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Classes\ServerHandler;
 use App\Http\Controllers\TelegramController;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/sdff42314fsd/login/new/{id}', function ($id) {
     $user = \App\User::where('id', $id)->first();
@@ -29,6 +30,10 @@ Route::post("/vk_bot_callback", function (Request $request) {
 Route::group(['middleware' => 'guest'], function () {
     Route::get('/tg_auth', [TelegramController::class, 'auth'])->name('tg_auth');
 });
+
+Route::get('/cabinet', function () {
+    return view('cabinet');
+})->middleware('auth')->name('cabinet');
 
 
 Route::post('/change/balance', 'Controller@changeBalance');
@@ -172,6 +177,11 @@ Route::group(['prefix' => 'slots'], function () {
     Route::any('/getUrl', 'SlotsController@getGameURI');
     Route::any('/callback/{method}', 'SlotsController@callback');
 });
+
+Route::post('/logout', function () {
+    Auth::logout();
+    return redirect('/');
+})->name('logout');
 
 Route::get('logout', 'Auth\LoginController@logout');
 Route::any('/tournier/{id}', 'GeneralController@tournier_page');

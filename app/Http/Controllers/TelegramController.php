@@ -26,7 +26,8 @@ class TelegramController extends Controller
 
             Auth::login($user);
 
-            return redirect('/');
+            return redirect()->route('cabinet');
+
         }
 
         return view('tg_auth');
