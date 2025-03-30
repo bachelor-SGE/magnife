@@ -4,50 +4,64 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
+use Illuminate\Support\Facades\Log; // ← вот это строка
+use App\User;
 
 class TelegramController extends Controller
 {
-    public function auth(Request $request)
+    public function showAuthForm()
     {
-        if ($request->has('id') && $request->has('hash')) {
-            if (!$this->isValidTelegramCallback($request->all())) {
-                return redirect('/')->withErrors(['telegram' => 'Ошибка верификации Telegram.']);
-            }
-
-            $user = User::firstOrCreate(
-                ['telegram_id' => $request->get('id')],
-                [
-                    'name' => $request->get('first_name') . ' ' . $request->get('last_name'),
-                    'username' => $request->get('username'),
-                    'avatar' => $request->get('photo_url'),
-                ]
-            );
-
-            Auth::login($user);
-
-            return redirect()->route('cabinet');
-
-        }
-
         return view('tg_auth');
     }
 
-    private function isValidTelegramCallback(array $data): bool
+    public function handleCallback(Request $request)
     {
-        $check_hash = $data['hash'];
-        unset($data['hash']);
-        ksort($data);
+        $data = $request->all();
+        Log::info('Telegram callback data', $data); // пример использования
 
-        $data_check_string = '';
-        foreach ($data as $key => $value) {
-            $data_check_string .= "$key=$value\n";
+        if (!$this->isTelegramHashValid($data)) {
+            abort(403, 'Invalid Telegram auth data.');
         }
-        $data_check_string = trim($data_check_string);
 
-        $secret_key = hash('sha256', env('TELEGRAM_BOT_TOKEN'), true);
-        $hash = hash_hmac('sha256', $data_check_string, $secret_key);
+        $user = User::firstOrCreate(
+            ['telegram_id' => $data['id']],
+            [
+                'name' => $data['first_name'] ?? 'Telegram User',
+                'username' => $data['username'] ?? null,
+                'avatar' => $data['photo_url'] ?? null,
+            ]
+        );
 
-        return hash_equals($hash, $check_hash);
+        Auth::login($user);
+
+        return redirect('/');
+    }
+
+    private function isTelegramHashValid(array $data): bool
+    {
+        if (!isset($data['hash'])) {
+            return false;
+        }
+
+        $checkHash = $data['hash'];
+        unset($data['hash']);
+
+        ksort($data);
+        $dataCheckString = implode("\n", array_map(
+            fn($k, $v) => "$k=$v",
+            array_keys($data),
+            $data
+        ));
+
+        $secretKey = hash('sha256', config('services.telegram.token'), true);
+
+        $hash = hash_hmac('sha256', $dataCheckString, $secretKey);
+
+        Log::info('Secret token: ' . config('services.telegram.token'));
+        Log::info('Expected hash: ' . $hash);
+        Log::info('Incoming hash: ' . $checkHash);
+
+
+        return hash_equals($hash, $checkHash);
     }
 }

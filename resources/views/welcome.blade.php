@@ -1,4 +1,6 @@
- <div class="wrapper">
+
+
+<div class="wrapper">
 
     <div class="newTimerBlock" style="display: none;">
         <img class="chat__promocode-img" src="images/snow/promocode.png" draggable="false">

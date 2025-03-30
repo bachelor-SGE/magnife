@@ -5,19 +5,19 @@
             <div class="navbar-brand-box">
                 <a href="/admin" class="logo logo-dark">
                     <span class="logo-sm">
-                        WINX.PW
+                        magnife.ru
                     </span>
                     <span class="logo-lg">
-                        WINX.PW
+                        magnife.ru
                     </span>
                 </a>
 
                 <a href="/admin" class="logo logo-light">
                     <span class="logo-sm">
-                        WINX.PW
+                        magnife.ru
                     </span>
                     <span class="logo-lg">
-                        WINX.PW
+                        magnife.ru
                     </span>
                 </a>
             </div>

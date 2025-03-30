@@ -14,10 +14,6 @@ $gamesAll = round(\Auth::user()->win_games + \Auth::user()->lose_games);
 		<div class="profile__user d-flex flex-column align-center justify-center">
 			<div class="profile__top d-flex align-center justify-space-between">
 				<b>Профиль</b>
-				<a href="https://vk.com/id{{\Auth::user()->vk_id}}" target="_blank" class="d-flex align-center">
-					<svg class="icon small"><use xlink:href="images/symbols.svg#vk"></use></svg>
-					<span>Профиль</span>
-				</a>
 			</div>
 			<div class="profile__avatar d-flex justify-center align-center">
 				<div class="profile__avatar-ellipse d-flex justify-center align-center">

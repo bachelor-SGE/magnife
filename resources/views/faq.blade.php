@@ -3,7 +3,7 @@
         <div class="faq__item">
             <div class="faq__item-heading d-flex align-center">
                 <b class="faq__item-question d-flex align-center justify-center">?</b>
-                <span>Что такое SO-YOU-START.RU?</span>
+                <span>Что такое MAGNIFE.RU?</span>
             </div>
             <div class="faq__item-body">
                 <p>SO-YOU-START.RU — сервис мгновенных игр.</p>
@@ -35,7 +35,7 @@
                 <span>Какая минимальная сумма вывода?</span>
             </div>
             <div class="faq__item-body">
-                <p>Минимальная сумма вывода составляет 100Р.</p>
+                <p>Минимальная сумма вывода составляет 700Р.</p>
             </div>
         </div>
         <div class="faq__item">

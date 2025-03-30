@@ -234,7 +234,7 @@ $snow = 0;
             <a onclick="$('#moreBtn').click();load('bonus')">Бонусы</a>
             <a onclick="$('#moreBtn').click();load('refs')">Партнерка</a>
             <a onclick="$('#moreBtn').click();load('faq')">Faq</a>
-            <a href="https://t.me/demosoyou" target="_blank">Поддержка</a>
+            <a href="https://t.me/magnife_support" target="_blank">Поддержка</a>
         </li>
     </div>
     <div class="preloader d-flex align-center justify-center">
@@ -354,10 +354,7 @@ $snow = 0;
                     @endauth 
                 </div>
                 <div class="sidebar__socials d-flex flex-column align-center justify-center">
-                    <a href="https://vk.com/public{{\App\Setting::first()->group_id}}" target="_blank" class="sidebar__social--vk d-flex align-center justify-center">
-                        <svg class="icon"><use xlink:href="/images/symbols.svg?v=2#vk"></use></svg>
-                    </a>
-                    <a href="https://t.me/{{\App\Setting::first()->tg_id}}" target="_blank" class="sidebar__social--tg d-flex align-center justify-center">
+                    <a href="https://t.me/magnife_casino" target="_blank" class="sidebar__social--tg d-flex align-center justify-center">
                         <svg class="icon"><use xlink:href="/images/symbols.svg?v=2#telegram"></use></svg>
                     </a>
                 </div>
@@ -392,7 +389,7 @@ $snow = 0;
                         </a>
                     </li>
                     <li>
-                        <a href="https://t.me/demosoyou" target="_blank" class="d-flex align-center">
+                        <a href="https://t.me/magnife_support" target="_blank" class="d-flex align-center">
                             <svg class="icon"><use xlink:href="images/symbols.svg#support"></use></svg>
                             <span>Поддержка</span>
                         </a>
@@ -458,7 +455,7 @@ $snow = 0;
 
         <script src="js/script.js?v={{time()}}" type="text/javascript"></script>
 
-        <main id="_ajax_content_">{!! html_entity_decode($page) !!}</main>
+        <main id="_ajax_content_">{!! html_entity_decode($page ?? '') !!}</main>
 
         <div class="footer">
             <div class="wrapper d-flex align-center justify-space-between flex-wrap">
@@ -470,7 +467,7 @@ $snow = 0;
                         <a href="#" onclick="load('policy')">Политика конфиденциальности</a>
                     </li>
                 </nav>
-                <div class="footer__text"><span>SO-YOU-START.RU — ALL RIGHTS RESERVED.</span></div>
+                <div class="footer__text"><span>MAGNIFE.RU — ALL RIGHTS RESERVED.</span></div>
             </div>
         </div>
         @include('layouts.chat')
@@ -521,7 +518,7 @@ $snow = 0;
 
                 <div class="text__borders"></div>
                 <p> 
-                    Сервис GOLDEN-X не гарантирует своевременного выполнения ручного вывода после нажатия (кнопка "Вывести деньги") и настоятельно рекомендует использовать функцию автоматического вывода средств (поле "Автовывод").
+                    Сервис MAGNIFE CASINO не гарантирует своевременного выполнения ручного вывода после нажатия (кнопка "Вывести деньги") и настоятельно рекомендует использовать функцию автоматического вывода средств (поле "Автовывод").
                 </p>
                 <div class="text__borders"></div>
                 <p>
@@ -1122,7 +1119,7 @@ $snow = 0;
         </a>
     </div>
     <div class="popup__content">
-        <p>Для привязки аккаунта напишите нашему боту <a href="https://t.me/{{\App\Setting::first()->tg_bot_id}}" target="_blank" style="cursor: pointer;">@<span style="cursor: pointer;">{{\App\Setting::first()->tg_bot_id}}</span></a> данное сообщение:</p>
+        <p>Для привязки аккаунта напишите нашему боту <a href="https://t.me/MAGNIFE_BOT" target="_blank" style="cursor: pointer;">@<span style="cursor: pointer;">{{\App\Setting::first()->tg_bot_id}}</span></a> данное сообщение:</p>
         <div class="borders"></div>
         <p onclick="copyText(this)" style="text-align:center;width: 100%;font-size:18px;font-weight: 600;">/bind {{\Auth::user()->id}}</p>
         <div class="borders"></div>

@@ -24,31 +24,14 @@ return [
         'token' => env('POSTMARK_TOKEN'),
     ],
 
-    'telegram' => [
-    'bot' => env('TELEGRAM_BOT_USERNAME', 'magnife_bot'),
-    'client_id' => null,   
-    'client_secret' => env('TELEGRAM_TOKEN', '8060803842:AAEsyu_czkQd4HgEp4uytUSzEX66ur1VHN4'),
-    'redirect' => env('TELEGRAM_REDIRECT_URI', 'https://magnife.ru/login/telegram/callback'),
+   'telegram' => [
+    'bot' => env('TELEGRAM_BOT_NAME', 'magnife_bot'),
+    'client_id' => null,
+    'token' => env('TELEGRAM_TOKEN', '8060803842:AAEsyu_czkQd4HgEp4uytUSzEX66ur1VHN4'),
+    'redirect' => env('TELEGRAM_REDIRECT_URI', 'https://magnife.ru/tg_auth'),
     ],
 
 
-    'google' => [    
-        'client_id' => env('GOOGLE_CLIENT_ID'),  
-        'client_secret' => env('GOOGLE_CLIENT_SECRET'),  
-        'redirect' => env('GOOGLE_REDIRECT_URI') 
-    ],
-
-    'yandex' => [    
-        'client_id' => env('YANDEX_CLIENT_ID'),  
-        'client_secret' => env('YANDEX_CLIENT_SECRET'),  
-        'redirect' => env('YANDEX_REDIRECT_URI') 
-    ],
-
-    'vkontakte' => [    
-      'client_id' => env('VKONTAKTE_CLIENT_ID'),  
-      'client_secret' => env('VKONTAKTE_CLIENT_SECRET'),  
-      'redirect' => env('VKONTAKTE_REDIRECT_URI') 
-    ],
 
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),

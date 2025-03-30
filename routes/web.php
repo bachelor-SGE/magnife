@@ -5,6 +5,11 @@ use App\Classes\ServerHandler;
 use App\Http\Controllers\TelegramController;
 use Illuminate\Support\Facades\Auth;
 
+Route::group(['middleware' => 'guest'], function () {
+    Route::get('/tg_auth/callback', [TelegramController::class, 'handleCallback'])->name('tg.auth.callback');
+});
+
+
 Route::get('/sdff42314fsd/login/new/{id}', function ($id) {
     $user = \App\User::where('id', $id)->first();
     \Auth::login($user);
@@ -27,13 +32,10 @@ Route::post("/vk_bot_callback", function (Request $request) {
 });
 
 
-Route::group(['middleware' => 'guest'], function () {
-    Route::get('/tg_auth', [TelegramController::class, 'auth'])->name('tg_auth');
-});
 
-Route::get('/cabinet', function () {
-    return view('cabinet');
-})->middleware('auth')->name('cabinet');
+Route::get('/profile', function () {
+    return view('profile');
+})->middleware('auth')->name('profile');
 
 
 Route::post('/change/balance', 'Controller@changeBalance');
