@@ -174,48 +174,6 @@ class ChatController extends Controller
     return response(['success' => 'success']);
   }
 
-  public function promoPublish1(){
-    $permitted_chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    $name = substr(str_shuffle($permitted_chars), 0, 4).'-'.substr(str_shuffle($permitted_chars), 0, 4).'-'.substr(str_shuffle($permitted_chars), 0, 4).'-'.substr(str_shuffle($permitted_chars), 0, 4);
-
-    $promocode = Promo::create([
-      'name' => $name,
-      'sum' => 5,
-      'active' => 20,
-      'user_id' => 0,
-      'user_name' => "Система"
-    ]);
-
-    \Cache::put('promo.name.'.$name, '1');
-    \Cache::put('promo.name.'.$name.'.active', 20);
-    \Cache::put('promo.name.'.$name.'.active.count', 0);
-    \Cache::put('promo.name.'.$name.'.sum', 5);
-
-    $message = Message::create([
-      'content'  => $name,
-      'type_mess' => 0,
-      'autor' => '<span style="color:#e45151">Новый промокод</span>',
-      'avatar' => "../img/ava_c.png",
-      'user_id' => 0,
-      'status_mess' => '',
-      'time' => date('H:i')
-    ]);
-        
-    $callback = [
-      'id' => $message->id,
-      'type_mess' => 0,
-      'success' => "success",
-      'content'  => $name,
-      'autor' => '<span style="color:#e45151">Новый промокод</span>',
-      'avatar' => "../img/ava_c.png",
-      'type' => "uploadMessage",
-      'status_mess' => '',
-      'time' => date('H:i')
-    ];
-
-    $this->redis->publish('mess', json_encode($callback));
-    return response(['success' => true, 'mess' => 'Успешно' ]);
-  }
 
   public function sendSticker(Request $request){
     $sticker = $request->sticker;

@@ -630,16 +630,14 @@ main {
 }
 
 @media only screen and (max-width: 1125px) {
-  .sidebar {
-    display: none;
-  }
+  
   .chat {
     width: 100% !important;
     z-index: 4;
     background: #EBECF2 !important;
     margin-top: 75px;
-    height: calc(100% - 140px) !important;
-    display: none;
+    height: 100% !important;
+    
   }
   .chat:before {
     content: '';
@@ -1252,15 +1250,17 @@ main {
   position: fixed;
   right: 0;
   width: 424px;
-  height: 100%;
+  top: 0 !important;
+  bottom: 0 !important;
   background: linear-gradient(286.81deg, #F0F2FF 14.71%, rgba(235, 236, 242, 0.6));
   padding: 17px 0;
-  top: 0;
-  -webkit-transition: 0.15s ease;
   transition: 0.15s ease;
-  border-left: solid 1px #DEE2F8;
+  border-left: 1px solid #DEE2F8;
   z-index: 1;
 }
+
+
+
 
 .chat__heading {
   padding: 5px 23px;
@@ -2387,7 +2387,7 @@ main {
   background-image: url(../img/home/keno.jpg);
   background-size: cover;
   background-position: center;
-}
+} 
 
 .games__item.games__item--jackpot {
   background: linear-gradient(236.46deg, #E01B62 -0.12%, #1469CD 72.27%);
@@ -2823,21 +2823,7 @@ main {
   }
 }
 
-.games__item-bg--keno-x {
-  position: absolute;
-  right: 0px;
-  top: -100px;
-  width: 170px;
-  height: 490px;
-  background: url(../images/games/keno/keno.svg) repeat center center/cover;
-  background-position-y: 0;
-  background-size: 190px 190px;
-  -webkit-animation: 8s linear infinite keno;
-  animation: 8s linear infinite keno;
-  -webkit-transition-duration: 1000s;
-  transition-duration: 1000s;
-  z-index: 2;
-}
+
 
 @-webkit-keyframes keno {
   from {
@@ -2857,15 +2843,6 @@ main {
   }
 }
 
-.games__item-bg--keno {
-  position: absolute;
-  right: -60px;
-  top: -30px;
-  width: 170px;
-  height: 170px;
-  background: url(../images/games/keno/keno-card.svg) center center/contain no-repeat;
-  z-index: 3;
-}
 
 .games__item-bg--jackpot {
   position: absolute;
@@ -11045,15 +11022,16 @@ main {
   position: fixed;
   right: 0;
   width: 424px;
-  height: 100%;
+  top: 0 !important;
+  bottom: 0 !important;
   background: linear-gradient(286.81deg, #F0F2FF 14.71%, rgba(235, 236, 242, 0.6));
   padding: 17px 0;
-  top: 0;
-  -webkit-transition: 0.15s ease;
   transition: 0.15s ease;
-  border-left: solid 1px #DEE2F8;
+  border-left: 1px solid #DEE2F8;
   z-index: 1;
 }
+
+
 
 .chat__heading {
   padding: 5px 23px;

@@ -77,16 +77,16 @@
 
 <div class="games">
 
-    <a href="slots" class="games__item games__item--slots flare d-flex align-end">
+    <!-- <a href="slots" class="games__item games__item--slots flare d-flex align-end">
         <div class="games__item-text d-flex flex-column">
             <span>SLOTS</span>
             <p>? человек</p>
         </div>
-    </a>
+    </a> !-->
     <a href="shoot" class="games__item games__item--shoot flare d-flex align-end">
         <div class="games__item-text d-flex flex-column">
             <span>Crazy <br> Shoot</span>
-            <p>? человек</p>
+            <p>13 человек</p>
         </div>
     </a>
 
@@ -94,14 +94,14 @@
     <a  onclick="load('x100')" class="games__item games__item--x100 flare d-flex align-end">
         <div class="games__item-text d-flex flex-column">
             <span>X100</span>
-            <p>? человек</p>
+            <p> 56человек</p>
         </div>
     </a>
 
     <a  onclick="load('x30')" class="games__item games__item--x30 flare d-flex align-end">
         <div class="games__item-text d-flex flex-column">
             <span>X30</span>
-            <p>? человек</p>
+            <p>79 человек</p>
         </div>
     </a>
 
@@ -110,7 +110,7 @@
     <a  onclick="load('dice')" class="games__item games__item--dice flare d-flex align-end">
         <div class="games__item-text d-flex flex-column">
             <span>Dice</span>
-            <p>? человек</p>
+            <p>57 человек</p>
         </div>
     </a>
 
@@ -118,7 +118,7 @@
     <a onclick="load('mines')" class="games__item games__item--mines  flare d-flex align-end">
         <div class="games__item-text d-flex flex-column">
             <span>Mines</span>
-            <p>? человек</p>
+            <p>214 человек</p>
         </div>
     </a>
 
@@ -130,7 +130,7 @@
 
         <div class="games__item-text d-flex flex-column">
             <span>Crash</span>
-            <p>? человека</p>
+            <p>597 человека</p>
         </div>
     </a>
 
@@ -138,30 +138,30 @@
 
         <div class="games__item-text d-flex flex-column">
             <span>Coin Flip</span>
-            <p>? человека</p>
+            <p>74 человека</p>
         </div>
     </a>
-    <a onclick="load('keno')" class="games__item games__item--keno flare d-flex align-end">
+    <!--<a onclick="load('keno')" class="games__item games__item--keno flare d-flex align-end">
 
         <div class="games__item-text d-flex flex-column">
             <span>Keno</span>
             <p>? человека</p>
         </div>
-    </a>
+    </a>-->
 
-    <a onclick="load('boomcity')" class="games__item games__item--soon games__item--boomcity flare d-flex align-end">
+    <a onclick="load('HOLDEM')" class="games__item games__item--soon games__item--boomcity flare d-flex align-end">
         <div class="games__item-soon">
             <span>Soon</span>
         </div>
         <div class="games__item-text d-flex flex-column">
-            <span>Boom <br> City</span>
-            <p>? человек</p>
+            <span>TEXAS <br> HOLDEM</span>
+            
         </div>
         <div class="games__item-bg--dice-3"></div>
         <div class="games__item-bg--dice-2"></div>
         <div class="games__item-bg-confetti"></div>
         <div class="games__item-bg-ellipse"></div>
-    </a> 
+    </a>
 
 </div>
 </div>
@@ -199,4 +199,18 @@
         $('.overlayed, body, .popup.'+el).addClass('active');
         $('.overlayed').removeClass('animation-closed');
     }
+
+    function getRandomNumber(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // После загрузки DOM выбираем все элементы <p> внутри классов .games__item-text
+    document.addEventListener("DOMContentLoaded", function() {
+        const elements = document.querySelectorAll('.games__item-text p');
+    elements.forEach(el => {
+      // Для каждого элемента генерируем случайное число от 1 до 568
+        const randomNumber = getRandomNumber(1, 568);
+         el.textContent = randomNumber + " человек";
+    });
+  });
 </script>

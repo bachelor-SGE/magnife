@@ -22,26 +22,17 @@ $setting = \App\Setting::first();
 
     </div>
 
-    <div class="chat__promocode">
-                <div class="chat__promocode-inner" @if($setting->theme == 0)style="padding-left: 30px;"@endif>
-                    @if($setting->theme == 1)
-                    <img class="chat__promocode-img" src="images/snow/promocode.png">
-                    @endif
-                    <h4>Новый промокод</h4>
-                    <div class="chat__promocode-timer Chat d-flex align-center">
-                        <span class="chat__promocode-timer--span">0</span>
-                        <span class="chat__promocode-timer--span">1</span>
-                        <span>:</span>
-                        <span class="chat__promocode-timer--span">3</span>
-                        <span class="chat__promocode-timer--span">4</span>
-                        <span>:</span>
-                        <span class="chat__promocode-timer--span">2</span>
-                        <span class="chat__promocode-timer--span">2</span>
-                    </div>
-                </div>
+        <div class="chat__promocode">
+            <div class="chat__promocode-inner" @if($setting->theme == 0) style="padding-left: 1px;" @endif>
+                @if($setting->theme == 1)
+                <img class="chat__promocode-img" src="images/snow/promocode.png">
+                @endif
+                <h4 style="font-size: 2em; text-align: center;">MAGNIFE CHAT</h4>
             </div>
+        </div>
+
  
-    <!--         <div class="chat__giveaway">
+        <!-- <div class="chat__giveaway">
             <div class="chat__giveaway-inner">
                 <h5>Промокод каждый час</h5>
                 <div class="chat__giveaway-timer d-flex align-center">
