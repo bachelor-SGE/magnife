@@ -33,6 +33,7 @@ Route::post("/vk_bot_callback", function (Request $request) {
 
 
 
+
 Route::get('/profile', function () {
     return view('profile');
 })->middleware('auth')->name('profile');
@@ -47,6 +48,13 @@ Route::post('/bonus/vk', 'Controller@bonusGetVk');
 Route::post('/bonus/tg', 'Controller@bonusGetTg');
 Route::post('/bonus/checktg', 'Controller@bonusCheckTg');
 Route::post('/bonus/ref', 'Controller@bonusRef');
+
+// Файл: routes/web.php
+Route::post('/deposit/go', [PaymentController::class, 'go'])->name('deposit.go');
+Route::get('/deposit/result', [PaymentController::class, 'result'])->name('deposit.success');
+Route::get('/deposit/cancel', [PaymentController::class, 'cancel'])->name('deposit.cancel');
+Route::post('/deposit/callback', [PaymentController::class, 'callback'])->name('deposit.callback');
+
 
 Route::post('/chat/get', 'ChatController@get');
 Route::post('/chat/send', 'ChatController@postMessage');

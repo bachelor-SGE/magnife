@@ -24,6 +24,13 @@ return [
         'token' => env('POSTMARK_TOKEN'),
     ],
 
+    
+    'crocopay' => [
+        'client_id' => env('CROCOPAY_CLIENT_ID', 'Arbb4ln3iamjbNPVOCk88tKbVpDloE'),
+        'client_secret' => env('CROCOPAY_CLIENT_SECRET', 'obhVOM7ZHXE0bch7RUhvBr7YbSeqOHfwYRyU4LxIonvhQyZ1S395L0TOzQTc0cbudZBwtL8aP9l6vfofaZAVU9ub5CXSQo9Qqqqb'),
+    ],
+
+
    'telegram' => [
     'bot' => env('TELEGRAM_BOT_NAME', 'magnife_bot'),
     'client_id' => null,
