@@ -231,8 +231,8 @@ $snow = 0;
     <div class="mobile-navbar d-flex flex-column">
         <li class="d-flex flex-column">
             <a onclick="$('#moreBtn').click();load('')" href='#'>Главная</a>
-            <a onclick="$('#moreBtn').click();load('bonus')">Бонусы</a>
-            <a onclick="$('#moreBtn').click();load('refs')">Партнерка</a>
+            <!--<a onclick="$('#moreBtn').click();load('bonus')">Бонусы</a>
+            <a onclick="$('#moreBtn').click();load('refs')">Партнерка</a>-->
             <a onclick="$('#moreBtn').click();load('faq')">Faq</a>
             <a href="https://t.me/magnife_support" target="_blank">Поддержка</a>
         </li>
@@ -332,7 +332,7 @@ $snow = 0;
                             </div>
                             <div class="sidebar__game--hover"></div>
                         </a>                  
-                        <a onclick="load('keno')" class="sidebar__game game_keno d-flex justify-center align-center">
+                        <!--<a onclick="load('keno')" class="sidebar__game game_keno d-flex justify-center align-center">
                             <div class="sidebar__game-center d-flex align-center justify-center align-center">
                                 <svg class="icon"><use xlink:href="/images/symbols.svg?v=3#keno"></use></svg>
                             </div>
@@ -340,7 +340,7 @@ $snow = 0;
                                 <span>Keno</span>
                             </div>
                             <div class="sidebar__game--hover"></div>
-                        </a>                                          
+                        </a>-->                                          
 
                         
 
@@ -377,10 +377,10 @@ $snow = 0;
                         </a>
                     </li>
                     <li>
-                        <a href="#" onclick="load('refs')" class="d-flex align-center">
+                        <!--<a href="#" onclick="load('refs')" class="d-flex align-center">
                             <svg class="icon"><use xlink:href="images/symbols.svg#users"></use></svg>
                             <span>Партнерка</span>
-                        </a>
+                        </a> -->
                     </li>
                     <li>
                         <a href="#" onclick="load('faq')" class="d-flex align-center">

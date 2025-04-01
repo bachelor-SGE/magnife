@@ -1,6 +1,6 @@
 <div class="wrapper">
 	<div style="margin-top: 20px;" class="bonus">
-		<div class="bonus__top">
+		<!--<div class="bonus__top">
 			<div class="bonus__items">
 				<div class="bonus__item">
 					<div class="bonus__item-title"><span>Вконтакте</span></div>
@@ -47,7 +47,7 @@
 							</div>
 						</div>
 					</div>
-				</div>
+				</div> 
 				<div class="bonus__item bonus__item--block bonus__item--levels" style="display: none;">
 					<div class="bonus__item-title"><span>Уровни</span></div>
 					<div class="bonus__content d-flex align-center justify-space-between flex-wrap">
@@ -87,7 +87,7 @@
 					</div>
 				</div>
 			</div>
-		</div>
+		</div> -->
 
 		<div class="bonus__bottom">
 			<div class="bonus__hits d-flex flex-column">
