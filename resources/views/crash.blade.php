@@ -329,6 +329,7 @@
                 _token: csrf_token
             }
             $.post('/crash/get',info).then(e=>{
+                console.log('Ответ от сервера:', e);
                 give = e.give
                 if (give == 1){
                     bet_user = 1;   

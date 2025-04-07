@@ -3,167 +3,149 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
-use App\Models\Payment;
-use App\Models\User;
+use App\SystemDep;
+use App\DepPromo;
+use App\User;
+use App\ActivePromo;
+use App\Setting;
+use App\Status;
+use App\Payment;
+use Illuminate\Support\Facades\Redis;
 
 class PaymentController extends Controller
 {
-    // Для интеграции CrocoPay Express нужны два ключа:
-    // их можно задать в файле .env и получить через config('services.crocopay.*')
-    private $clientId;
-    private $clientSecret;
+	public function __construct()
+	{
+		parent::__construct();
+		$this->redis = Redis::connection();
+		$this->clientId = config('services.crocopay.client_id');
+		$this->clientSecret = config('services.crocopay.client_secret');
+	}
 
-    public function __construct()
-    {
-        // Эти значения можно предварительно задать в .env и services.php, например:
-        // CROCOPAY_CLIENT_ID=ваш_публичный_ключ
-        // CROCOPAY_CLIENT_SECRET=ваш_секретный_ключ
-        $this->clientId = config('services.crocopay.client_id'); 
-        $this->clientSecret = config('services.crocopay.client_secret');
-    }
+	public function go(Request $r){
+		$sum = $r->sum;
+		$system = $r->system;
+		$promo = $r->promo;
 
-    /**
-     * Инициирует платеж через CrocoPay Express.
-     *
-     * Метод получает сумму из формы (в рублях) и выполняет следующие шаги:
-     * 1. Получает access_token от CrocoPay.
-     * 2. Отправляет запрос на создание платежного ордера (initiate-payment) с указанием:
-     *    - суммы, валюты (RUB)
-     *    - URL для успешного редиректа (successUrl), отмены (cancelUrl)
-     *    - URL для callback-уведомления (callbackUrl) с передачей user_id.
-     * 3. Сохраняет запись платежа в базе данных и перенаправляет пользователя на redirect_url.
-     *
-     * Старый функционал для других платежных систем (FreeKassa, Qiwi, и т.п.) удалён.
-     */
-    public function go(Request $request)
-    {
-        $user = Auth::user();
-        $amount = floatval($request->input('amount'));
+		if(!is_numeric($sum)){
+			return response(['success' => false, 'mess' => 'Введите корректно сумму пополнения']);
+		}
 
-        // Валидация: сумма должна быть больше нуля
-        if ($amount <= 0) {
-            return redirect()->back()->with('error', 'Сумма должна быть больше 0');
-        }
+		if(\Auth::guest()){return response(['success' => false, 'mess' => 'Авторизуйтесь' ]);}
 
-        // Шаг 1: Получаем access_token от CrocoPay
-        $tokenResponse = Http::asForm()->post('https://crocopay.tech/api/v2/access-token', [
-            'client_id'     => $this->clientId,
-            'client_secret' => $this->clientSecret,
-        ]);
+		$user = \Auth::user();
+		if($user->type_balance == 1){
+			return response(['success' => false, 'mess' => 'Переключитесь на реальный баланс']);
+		}
+		$countSystemDep = SystemDep::where('id', $system)->count();
+		if($countSystemDep == 0){
+			return response(['success' => false, 'mess' => 'Ошибка']);
+		}
 
-        $tokenData = $tokenResponse->json();
+		$systemDep = SystemDep::where('id', $system)->first();
+		//$minDep = $systemDep->min_sum;
+		$psDep = $systemDep->ps;
+		$img = $systemDep->img;
 
-        if (!isset($tokenData['access_token'])) {
-            return redirect()->back()->with('error', 'Не удалось получить токен доступа от CrocoPay');
-        }
+		$minDep = 1000;
 
-        $accessToken = $tokenData['access_token'];
+		if($sum < $minDep){
+			return response(['success' => false, 'mess' => "Минимальная сумма пополнения {$minDep}р."]);
+		}
 
-        // Шаг 2: Инициируем платеж через API CrocoPay
-        $initResponse = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $accessToken,
-        ])->asForm()->post('https://crocopay.tech/api/v2/initiate-payment', [
-            'client_id'     => $this->clientId,
-            'client_secret' => $this->clientSecret,
-            'amount'        => number_format($amount, 2, '.', ''),
-            'currency'      => 'RUB',
-            'successUrl'    => route('deposit.success'),  // URL успешной оплаты
-            'cancelUrl'     => route('deposit.cancel'),   // URL отмены оплаты
-            'callbackUrl'   => route('deposit.callback', ['user_id' => $user->id]), // URL для callback с указанием user_id
-        ]);
 
-        $initData = $initResponse->json();
+		$percent = 0;
 
-        if (isset($initData['status']) && $initData['status'] === 'success' && !empty($initData['redirect_url'])) {
-            // Сохраняем запись платежа с первоначальным статусом "pending"
-            Payment::create([
-                'user_id'     => $user->id,
-                'amount'      => $amount,
-                'status'      => 'pending',
-                'external_id' => $initData['transaction_id'] ?? null,
-            ]);
+		if($promo != ''){
+			$deppromo_count = DepPromo::where('name', $promo)->count();
+			if($deppromo_count == 0){
+				return response(['success' => false, 'mess' => 'Промокод не найден или закончился' ]);
+			}
 
-            // Шаг 3: Перенаправляем пользователя на страницу оплаты CrocoPay
-            return redirect()->away($initData['redirect_url']);
-        } else {
-            $message = $initData['message'] ?? 'Ошибка инициации платежа';
-            return redirect()->back()->with('error', 'Оплата не создана: ' . $message);
-        }
-    }
+			$promo_act_count = ActivePromo::where('promo', $promo)->where('user_id', $user->id)->count();
+			if ($promo_act_count > 0)  {
+				return response(['success' => false, 'mess' =>  "Вы уже использовали этот код"]);
+			}
+			$deppromo = DepPromo::where('name', $promo)->first();
+			$start = strtotime($deppromo->start);
+			$end = strtotime($deppromo->end);
+			$now_time = time();
+			if($deppromo->actived >= $deppromo->active){
+				return response(['success' => false, 'mess' => 'Промокод не найден или закончился' ]);
+			}
+			if($now_time < $start){
+				return response(['success' => false, 'mess' => 'Промокод будет доступен '.date('d.m в H:i', $start) ]);
+			}
+			if($now_time > $end){
+				return response(['success' => false, 'mess' => 'Промокод не найден или закончился' ]);
+			}
 
-    /**
-     * Обработка callback-уведомления от CrocoPay.
-     *
-     * Здесь CrocoPay отправляет уведомление (обычно в формате JSON) о результате платежа.
-     * Если статус платежа равен "Success", производится:
-     * - увеличение баланса пользователя,
-     * - обновление статуса записи платежа на "success".
-     *
-     * Обратите внимание, что метод ожидает данные в виде JSON.
-     */
-    public function callback(Request $request)
-    {
-        // Принимаем JSON-данные
-        $data = $request->json()->all();
+			$percent = $deppromo->percent;
+			$deppromo->actived += 1;
+			$deppromo->save();
 
-        // Если статус не равен "Success", уведомление игнорируется
-        if (!isset($data['status']) || $data['status'] !== 'Success') {
-            return response('Ignored', 200);
-        }
+			ActivePromo::create([
+				'promo' => $promo,
+				'user_id' => $user->id,
+				'type_promo' => 1,
+				'promo_id' => $deppromo->id,
+			]);
+		}
 
-        // Определяем идентификатор пользователя (передаётся через callbackUrl)
-        $userId = $data['user_id'] ?? $request->query('user_id');
-        $amount = isset($data['total']) 
-                    ? floatval($data['total']) 
-                    : (isset($data['amount']) ? floatval($data['amount']) : 0);
+		$unique_id = time() * $user->id;
+		$modal = 0;
+		$transfer = 'false';
 
-        if (!$userId || $amount <= 0) {
-            return response('Bad data', 400);
-        }
+		// Генерация ссылки оплаты через Crocopay
+		$callbackUrl = "https://crocopay.tech/api/payment?user_id=" . $user->id;
+		$successUrl = "https://crocopay.tech/dashboard";
+		$cancelUrl = "https://crocopay.tech";
 
-        // Зачисляем сумму на баланс пользователя
-        $user = User::find($userId);
-        if ($user) {
-            $user->balance += $amount;
-            $user->save();
-        }
+		$payload = [
+			'client_id'     => $this->clientId,
+			'client_secret' => $this->clientSecret,
+			'amount'        => $sum,
+			'currency'      => 'RUB',
+			'successUrl'    => $successUrl,
+			'cancelUrl'     => $cancelUrl,
+			'callbackUrl'   => $callbackUrl,
+		];
 
-        // Обновляем запись платежа: меняем статус на "success" и сохраняем transaction_id от CrocoPay
-        Payment::where('user_id', $userId)
-            ->where('status', 'pending')
-            ->update([
-                'status'      => 'success',
-                'external_id' => $data['transaction_id'] ?? null,
-            ]);
+		$ch = curl_init('https://crocopay.tech/api/v2/initiate-payment');
+		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($payload));
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_POST, true);
+		$response = curl_exec($ch);
+		curl_close($ch);
 
-        return response('OK', 200);
-    }
+		$responseData = json_decode($response, true);
 
-    /**
-     * Обработка возврата пользователя после успешной оплаты.
-     *
-     * Здесь можно вывести сообщение об успешном платеже и перенаправить пользователя
-     * на страницу профиля или другую целевую страницу.
-     */
-    public function result(Request $request)
-    {
-        return redirect('/profile')->with('success', 'Оплата выполнена успешно!');
-    }
+		if (!isset($responseData['redirect_url'])) {
+			return response(['success' => false, 'mess' => 'Ошибка создания ссылки оплаты: ' . ($responseData['message'] ?? 'Неизвестно')]);
+		}
 
-    /**
-     * Обработка возврата пользователя при отмене оплаты.
-     *
-     * Здесь выводится сообщение об отмене платежа.
-     */
-    public function cancel(Request $request)
-    {
-        return redirect('/profile')->with('error', 'Оплата была отменена.');
-    }
+		$link = $responseData['redirect_url'];
 
-    // --------------------------------------------------------------------
-    // Ниже находились старые методы для других платежных систем (например, resultFK, resultPiastrix, resultQpay и пр.)
-    // Они удалены, чтобы оставить только CrocoPay Express.
-    // --------------------------------------------------------------------
+		Payment::create([
+			'user_id' => $user->id,
+			'login' => $user->name,
+			'avatar' => $user->avatar,
+			'sum' => $sum,
+			'data' => date('d.m.Y H:i'),
+			'transaction' => $unique_id,
+			'beforepay' => $user->balance,
+			'percent' => $percent,
+			'img_system' => $img
+		]);
+
+		return response([
+			'success' => true,
+			'link' => $link,
+			'modal' => $modal,
+			'transfer' => $transfer,
+			'img' => $img
+		]);
+	}
+
+	// Остальные методы остались без изменений...
 }

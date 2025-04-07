@@ -313,7 +313,8 @@ socket.on('WHEEL_NEW_COEFF',e=>{
 
 
 socket.on('WHEEL_START',e=>{
-	startWheel(e)
+	console.log("🚀 ПОЛУЧЕНО WHEEL_START от сервера:", e);
+	startWheel(e);
 })
 
 socket.on('WHEEL_BONUS',e=>{
@@ -337,17 +338,42 @@ function startBonus(e){
 	})
 }
 
-function startWheel(e){
+function startWheel(e) {
+    // Остановить старый таймер
+    if (typeof gameTimer !== 'undefined' && gameTimer) {
+        clearInterval(gameTimer);
+        gameTimer = null;
+        console.log('🛑 Остановлен таймер перед вращением');
+    }
 
-	if(e.wheelStatus == 1){
-		$('#x30__text').html('Прокрутка');
-		$('#x30__status').addClass('x30__rocket--started');
-	}
+    // Обновить интерфейс
+    if (e.wheelStatus == 1) {
+        $('#x30__text').html('Прокрутка');
+        $('#x30__status').addClass('x30__rocket--started');
+        $('#x30__timer').text('Прокрутка');
+    }
 
-	rotateW = e.wheelRotate + e.wheelPlus;
-	$('#x30__wheel').css('transition', 'all '+e.wheelTime+'s ease 0s').css('transform', 'rotate('+rotateW+'deg)')
-	console.log('startWheel')
+    // Вращение
+    let rotateW = e.wheelRotate + e.wheelPlus;
+    $('#x30__wheel').css('transition', 'all ' + e.wheelTime + 's ease 0s')
+                    .css('transform', 'rotate(' + rotateW + 'deg)');
+    console.log('🚀 Крутим колесо');
+
+    // По завершению вращения — возвращаемся к newGame
+    setTimeout(() => {
+        $('#x30__status').removeClass('x30__rocket--started');
+        $('#x30__text').text('Начало через');
+        $('#x30__timer').text('30');
+
+        //if (typeof newGame === 'function') {
+        //    console.log("♻ Запускаем новый раунд");
+        //    newGame();
+        //}
+    }, e.wheelTime * 1000 + 1500);
 }
+
+
+
 
 
 socket.on('WHEEL_TIME',e=>{

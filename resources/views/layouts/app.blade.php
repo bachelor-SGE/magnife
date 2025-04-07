@@ -272,7 +272,7 @@ $snow = 0;
                             <div class="sidebar__game--hover"></div>
                         </a>
                         
-                        <a onclick="load('x100')" class="sidebar__game game_x100 d-flex justify-center align-center">
+                        <!--<a onclick="load('x100')" class="sidebar__game game_x100 d-flex justify-center align-center">
                             <div class="sidebar__game-center d-flex align-center justify-center align-center">
                                 <svg class="icon"><use xlink:href="/images/symbols.svg#x100"></use></svg>
                             </div>
@@ -290,7 +290,7 @@ $snow = 0;
                                 <span>X30</span>
                             </div>
                             <div class="sidebar__game--hover"></div>
-                        </a>
+                        </a>-->
 
                         <a href="crash" class="sidebar__game  game_crash d-flex justify-center align-center">
                             <div class="sidebar__game-center d-flex align-center justify-center align-center">

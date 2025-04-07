@@ -91,7 +91,7 @@
     </a>
 
 
-    <a  onclick="load('x100')" class="games__item games__item--x100 flare d-flex align-end">
+    <!--<a  onclick="load('x100')" class="games__item games__item--x100 flare d-flex align-end">
         <div class="games__item-text d-flex flex-column">
             <span>X100</span>
             <p> 56человек</p>
@@ -103,7 +103,7 @@
             <span>X30</span>
             <p>79 человек</p>
         </div>
-    </a>
+    </a>!-->
 
 
 

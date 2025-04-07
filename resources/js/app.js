@@ -30,3 +30,19 @@ Vue.component('example-component', require('./components/ExampleComponent.vue').
 const app = new Vue({
     el: '#app',
 });
+
+import io from 'socket.io-client';
+
+const socket = io('https://magnife.ru:2083', {
+  transports: ['websocket'],
+  secure: true,
+});
+
+socket.on('connect', () => {
+  console.log('✅ WebSocket подключён');
+  socket.emit('getUsersOnline');
+});
+
+socket.on('usersOnline', (count) => {
+  console.log('👥 Онлайн:', count);
+});

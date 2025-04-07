@@ -18,9 +18,9 @@ const mysql = require('mysql')
 const util = require('util')
 var client = mysql.createConnection({
     host: 'localhost',
-    user: 'root',
-    password: '994991',
-    database: '5',
+    user: 'magnife_user',
+    password: 'СильныйПароль123',
+    database: 'magnife',
 });
 client.query = util.promisify(client.query);
 client.query("SET SESSION wait_timeout = 604800");
@@ -38,14 +38,18 @@ io = require("socket.io")(server, {
 
 
 server.listen(2083, () => {
-    //  console.log('server listen 2083');
+    console.log('server listen 2083');
 });
 
 usersOnline = [];
 gamesOnline = [[],[],[],[],[],[],[],[],[]];
 
 io.on('connection', async (socket) => {
+    console.log("🧲 Подключился клиент:", socket.id);
 
+    socket.onAny((event, ...args) => {
+        console.log("📥 Клиент отправил событие:", event, args);
+    });
 
     socket.on('getUsersOnline', function() {
         socket.emit('usersOnline', usersOnline.length);
@@ -715,6 +719,7 @@ function startWheel(TIMER_WHEEL){
             wheelRotate = 360 / 30 * (number_double) + umn;
             TipeWheel = 'cubic-bezier(0, 0.49, 0, 1)'
             io.sockets.emit('WHEEL_START', {wheelStatus:1, colorCoffResult, wheelPlus: wheelPlus, wheelTime: 30,TipeWheel, wheelRotate })
+            console.log("🚀 Отправляем WHEEL_START!");
             wheelStatus = 1
             var finish = 30
             var finisherwheel = false
@@ -2419,3 +2424,5 @@ function sendPromo() {
 }
 
 startPromoTimer()
+
+

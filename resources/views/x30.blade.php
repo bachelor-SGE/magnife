@@ -366,6 +366,8 @@ $setting = \App\Setting::first();
     }
 </script>
 
+<script src="{{ asset('js/games/x30.js') }}"></script>
+
 @auth
 <script type="text/javascript">
     socket.emit('subscribe', 'roomGame_2_{{\Auth::user()->id}}');

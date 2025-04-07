@@ -68,6 +68,30 @@ class WheelController extends Controller
 
     }
 
+    use ElephantIO\Client;
+    use ElephantIO\Engine\SocketIO\Version2X;
+
+    public function startTimer()
+    {
+        // Создаем клиент для подключения к WebSocket-серверу
+        $client = new Client(new Version2X('https://magnife.ru:2083', [
+            'headers' => [
+                // если нужны какие-то заголовки, например, авторизация
+                'Authorization: Bearer your_token'
+            ],
+            'context' => ['ssl' => ['verify_peer_name' => false, 'verify_peer' => false]]
+        ]));
+        $client->initialize();
+
+        // Отправляем событие WheelTimer с параметром времени (например, 30 секунд)
+        $client->emit('WheelTimer', ['time' => 30]);
+
+        $client->close();
+
+        return response()->json(['success' => true]);
+    }
+
+
     public function randNumber()
     {
         $key = self::getKey();

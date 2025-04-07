@@ -2,7 +2,7 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
+use illuminate\Database\Eloquent\Model;
 
 class SystemDep extends Model
 {

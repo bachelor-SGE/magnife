@@ -1,31 +1,50 @@
-newGame();
-function newGame () {
-    var time = 30;
-    const timer = setInterval(() => {
-        time--
-        if (time <= 0) {
-            clearInterval(timer);
-            sliderWheel();
-        }
-        $('#x30__timer').html(time)
-    }, 1000)
-    $('#x30__text').html('Начало через');
+window.newGameCalls = (window.newGameCalls || 0) + 1;
+console.log("🧠 newGame() вызвана — уже", window.newGameCalls, "раз(а)");
+
+var gameTimer = null;
+
+socket = io('https://magnife.ru:2083', {
+    transports: ['websocket']
+});
+
+
+
+// Получение случайного числа
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function sliderWheel () {
-    var time = 30;
-    const timer = setInterval(() => {
-        time--
+function newGame () {
+    console.log("🟢 newGame() вызвана");
+
+    if (gameTimer) {
+        clearInterval(gameTimer);
+        gameTimer = null;
+    }
+
+    let time = 30;
+
+    gameTimer = setInterval(() => {
+        time--;
+        if (time < 0) return; // 🛡️ защита от отрицательных значений
+
+        console.log("⏳ newGame таймер:", time);
+
         if (time <= 0) {
-            clearInterval(timer);
-            setTimeout(() => {
-                newGame();
-                $('#x30__status').removeClass('x30__rocket--started');
-            }, 1500)
+            clearInterval(gameTimer);
+            gameTimer = null;
+            console.log("⌛ Ожидание события WHEEL_TIME от сервера");
         }
-        $('#x30__timer').html(time)
-    }, 1000)
-    $('#x30__text').html('Прокрутка');
-    $('#x30__status').addClass('x30__rocket--started');
-    $('#x30__wheel').css({'transform':'rotate('+ getRandomInt(600, 1200) +'deg)'});
+
+        $('#x30__timer').text(time);
+    }, 1000);
+
+    $('#x30__text').text('Начало через');
 }
+
+
+// Стартовая инициализация после загрузки документа
+$(document).ready(function() {
+    console.log("📦 $(document).ready → вызываем newGame()");
+    newGame();
+});

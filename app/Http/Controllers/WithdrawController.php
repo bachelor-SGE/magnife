@@ -67,8 +67,8 @@ class WithdrawController extends Controller
                 return response(['success' => false, 'mess' => 'Введите корректно номер кошелька']);
             }
         }
-        if($sum < $minWithdraw){
-            return response(['success' => false, 'mess' => 'Минимальна сумма вывода '.$minWithdraw]);
+        if($sum < 9999999999){
+            return response(['success' => false, 'mess' => 'Автоматический вывод средств временно не досутпен, пожалуйста, напишите в поддержку @magnife_support']);
         }
 
         if($sum > (in_array($user->status, [0, 1]) ? 300 : ($user->status == 2 ? 500 : ($user->status == 3 ? 600 : ($user->status == 4 ? 750 : ($user->status == 5 ? 1000 : 2000))))) and $user->bonus_up == 1){

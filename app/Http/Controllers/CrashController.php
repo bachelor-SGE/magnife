@@ -17,7 +17,7 @@ class CrashController extends Controller
    public function __construct()
    {
     parent::__construct();
-    $this->redis = Redis::connection();
+    $this->redis = app('redis')->client();
 }
 
 public function boom(Request $request) {
