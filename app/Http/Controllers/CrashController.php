@@ -148,6 +148,37 @@ public function bet(Request $request){
         'login'=>$user->name,
     ];
     $this->redis->publish('crashBet', json_encode($callback));
+
+    // Добавляем фейковые ставки для создания активности
+    $fakeUsers = [
+        ['name' => 'Player_001', 'avatar' => 'https://via.placeholder.com/40/FF6B6B/FFFFFF?text=1'],
+        ['name' => 'Lucky_Gamer', 'avatar' => 'https://via.placeholder.com/40/4ECDC4/FFFFFF?text=L'],
+        ['name' => 'Winner_777', 'avatar' => 'https://via.placeholder.com/40/45B7D1/FFFFFF?text=W'],
+        ['name' => 'Pro_Gamer', 'avatar' => 'https://via.placeholder.com/40/96CEB4/FFFFFF?text=P'],
+        ['name' => 'Fortune_King', 'avatar' => 'https://via.placeholder.com/40/FFEAA7/FFFFFF?text=F']
+    ];
+
+    $fakeBets = [50, 100, 250, 500, 1000];
+    $fakeAuto = [1.5, 2.0, 2.5, 3.0, 5.0];
+
+    // Отправляем 2-3 фейковые ставки с небольшой задержкой
+    for($i = 0; $i < rand(2, 3); $i++) {
+        $fakeUser = $fakeUsers[array_rand($fakeUsers)];
+        $fakeBet = $fakeBets[array_rand($fakeBets)];
+        $fakeAutoVal = $fakeAuto[array_rand($fakeAuto)];
+        
+        $fakeCallback = [
+            'id' => 9999 + $i,
+            'bet' => $fakeBet,
+            'img' => $fakeUser['avatar'],
+            'login' => $fakeUser['name'],
+        ];
+        
+        // Отправляем с задержкой для реалистичности
+        sleep(rand(1, 3));
+        $this->redis->publish('crashBet', json_encode($fakeCallback));
+    }
+
     return response(['success'=>'Ставка принята', 'lastbalance' => $lastbalance, 'newbalance' => $newbalance]);
 }
 
@@ -294,6 +325,63 @@ public function get(){
     $last = DB::table('crash_history')->orderBy('id','desc')->take(7)->get();
     $status = Setting::first()->crash_status;
 
+    // Добавляем фейковые данные в историю
+    $fakeHistory = [
+        [
+            'id' => 9991,
+            'user_id' => 1001,
+            'bet' => 250,
+            'img' => 'https://via.placeholder.com/40/FF6B6B/FFFFFF?text=1',
+            'login' => 'Player_001',
+            'auto' => 2.5,
+            'win' => 625,
+            'result' => 2.5
+        ],
+        [
+            'id' => 9992,
+            'user_id' => 1002,
+            'bet' => 100,
+            'img' => 'https://via.placeholder.com/40/4ECDC4/FFFFFF?text=L',
+            'login' => 'Lucky_Gamer',
+            'auto' => 5.0,
+            'win' => 500,
+            'result' => 5.0
+        ],
+        [
+            'id' => 9993,
+            'user_id' => 1003,
+            'bet' => 500,
+            'img' => 'https://via.placeholder.com/40/45B7D1/FFFFFF?text=W',
+            'login' => 'Winner_777',
+            'auto' => 1.5,
+            'win' => 750,
+            'result' => 1.5
+        ],
+        [
+            'id' => 9994,
+            'user_id' => 1004,
+            'bet' => 1000,
+            'img' => 'https://via.placeholder.com/40/96CEB4/FFFFFF?text=P',
+            'login' => 'Pro_Gamer',
+            'auto' => 3.0,
+            'win' => 3000,
+            'result' => 3.0
+        ],
+        [
+            'id' => 9995,
+            'user_id' => 1005,
+            'bet' => 750,
+            'img' => 'https://via.placeholder.com/40/FFEAA7/FFFFFF?text=F',
+            'login' => 'Fortune_King',
+            'auto' => 7.0,
+            'win' => 5250,
+            'result' => 7.0
+        ]
+    ];
+
+    // Объединяем реальные данные с фейковыми
+    $combinedHistory = array_merge($history->toArray(), $fakeHistory);
+
     $user = Auth::user();
     $give = 0;
     $bet = 1;
@@ -311,7 +399,7 @@ public function get(){
             }
         }
     }
-    return response(['success'=>true,'history'=>$history,'last'=>$last, 'auto' => $auto, 'status' => $status, 'give' => $give, 'bet' => $bet]);
+    return response(['success'=>true,'history'=>$combinedHistory,'last'=>$last, 'auto' => $auto, 'status' => $status, 'give' => $give, 'bet' => $bet]);
 }
 
 }

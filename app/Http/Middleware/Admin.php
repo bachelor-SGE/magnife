@@ -3,8 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Contracts\Auth\Guard;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 
 class Admin
 {
@@ -16,23 +15,12 @@ class Admin
      * @return mixed
      */
 
-    protected $auth;
-
-    public function __construct(Guard $auth)
-    {
-        $this->auth = $auth;
-    }
-
     public function handle($request, Closure $next)
     {
-        if ($this->auth->check())
-        {
-            if ($this->auth->user()->admin == 1 || $this->auth->user()->admin == 2) {
-                return $next($request);
-            }
+        if (!Auth::check() || !Auth::user()->is_admin) {
+            abort(403);
         }
-
-        return new RedirectResponse(url('/'));
+        return $next($request);
     }
 
 }

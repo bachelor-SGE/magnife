@@ -650,7 +650,7 @@ $snow = 0;
                         </div>
 
                         <div class="d-flex align-center justify-space-between">
-                            <div class="wallet__txt"><span class="d-flex align-center">Комиссия: 0%</span></div>
+                            <div class="wallet__txt"><span class="d-flex align-center">Комиссия: 0%. В случае если доступных реквезитов нет, попробуйте другую сумму, или метод перевода на карту</span></div>
                         </div>
                     </div>
                     <div class="wallet__content-bottom">

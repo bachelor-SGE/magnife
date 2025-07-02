@@ -101,7 +101,13 @@ $(document).ready(function() {
 	})
 });
 
-const socket = io(':2083');
+//const socket = io('https://magnife.ru:2083', {
+//	  transports: ['websocket'],    // сразу «вверхградинг» на WebSocket
+//	  secure: true,
+//	  withCredentials: true         // важно для CORS-разрешений
+//	});
+
+var socket = io();
 
 socket.emit('getUsersOnline');
 socket.emit('getGamesOnline');
@@ -2328,11 +2334,11 @@ $('#lightTheme').click(function(e){
 
 
  // initial data
- let countY = [0, 2];
- let countX = [0, 1];
+ var countY = [0, 2];
+ var countX = [0, 1];
 
- let updatedCountY = [0];
- let updatedCountX = [0];
+ var updatedCountY = [0];
+ var updatedCountX = [0];
 
  var bet_user = 0;
 

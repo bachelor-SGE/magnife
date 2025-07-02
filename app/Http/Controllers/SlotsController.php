@@ -7,97 +7,171 @@ use App\Slots;
 use App\User;
 use Auth;
 use App\Payment;
+use App\Services\CasinoDogService;
 
 class SlotsController extends Controller
 {
+    protected $casinoDogService;
+
+    public function __construct(CasinoDogService $casinoDogService)
+    {
+        $this->casinoDogService = $casinoDogService;
+    }
+
     public function getGames(Request $request)
     {
         $show = $request->page * 30 - 30;
 
-        $slots = Slots::orderBy('priority', 'desc')->where([
-            [function ($query) use ($request) {
-                if(($provider = $request->provider)) {
-                    $query->where('provider', $provider)->get();
-                }
-                if(($search = $request->search)) {
-                    $query->where('title', 'like', '%' .$search. '%')->get();
-                }
-            }]
-        ])->where([['show', 1], ['is_live', 0]])->offset($show)->limit(30)->get();
+        // Удаляем встроенные слоты из выдачи
+        // $builtInGames = [...];
 
-        foreach($slots as $slot) {
-            $slot->icon = '/img/slots/'. implode('', explode(' ', $slot->title)) . '.jpg';
+        // Используем casino-slots-aggregation-app для получения игр
+        $casinoDogGames = $this->casinoDogService->getGames(
+            $request->provider,
+            $request->page,
+            30
+        );
+
+        // Если casino-slots-aggregation-app недоступен, используем локальную БД
+        if (empty($casinoDogGames['games'])) {
+            $slots = Slots::orderBy('priority', 'desc')->where([
+                [function ($query) use ($request) {
+                    if(($provider = $request->provider)) {
+                        $query->where('provider', $provider)->get();
+                    }
+                    if(($search = $request->search)) {
+                        $query->where('title', 'like', '%' .$search. '%')->get();
+                    }
+                }]
+            ])->where([['show', 1], ['is_live', 0]])->offset($show)->limit(30)->get();
+
+            foreach($slots as $slot) {
+                $slot->icon = '/img/slots/'. implode('', explode(' ', $slot->title)) . '.jpg';
+            }
+
+            $formattedGames = [];
+            foreach ($slots as $slot) {
+                $formattedGames[] = [
+                    'game_id' => $slot->game_id,
+                    'title' => $slot->title,
+                    'provider' => $slot->provider,
+                    'icon' => $slot->icon,
+                    'alias' => $slot->alias
+                ];
+            }
+
+            // Не добавляем встроенные слоты
+            // if ($request->page == 1) {
+            //     $formattedGames = array_merge($builtInGames, $formattedGames);
+            // }
+
+            return [
+                'games' => $formattedGames
+            ];
         }
 
+        // Форматируем игры от casino-slots-aggregation-app
+        $formattedGames = [];
+        foreach ($casinoDogGames['games'] as $game) {
+            $formattedGames[] = [
+                'game_id' => $game['id'] ?? $game['game_id'],
+                'title' => $game['name'] ?? $game['title'],
+                'provider' => $game['provider'],
+                'icon' => $game['image'] ?? '/img/slots/default.jpg',
+                'alias' => $game['alias'] ?? $game['slug']
+            ];
+        }
+
+        // Не добавляем встроенные слоты
+        // if ($request->page == 1) {
+        //     $formattedGames = array_merge($builtInGames, $formattedGames);
+        // }
+
         return [
-            'games' => $slots
+            'games' => $formattedGames
         ];
     }
 
     public function getGameURI(Request $request)
     {
-        $slot = Slots::where('game_id', $request->id)->first();
         $user = User::where('id', Auth::id())->first();
-
-        if(!$slot) {
-            return ['error' => 'Игра не найдена'];
-        }
 
         if(!$user) {
             return ['error' => 'Авторизуйтесь'];
         }
-
-        $user_deps = Payment::where('status', 1)->where('user_id', $user->id)->sum('sum');
-
-        //if($user_deps < 100) return ['error' => 'Необходимо пополнить 100р'];
 
         if($user->api_token == null) {
             $user->api_token = bin2hex(random_bytes(20));
             $user->save();
         }
 
-        $url = "https://test.partners.casinomobule.com/games.start?partner.alias=".($user->admin == 3 ? 'soyoustartvhguru' : 'soyoustartvhguru')."&partner.session={$user->api_token}&game.provider={$slot->provider}&game.alias={$slot->alias}&lang=ru&lobby_url=https://beta.so-you-start.ru/slots&currency=RUB&mobile=false";
+        // Используем casino-slots-aggregation-app для получения URL игры
+        $gameUrl = $this->casinoDogService->getGameUrl(
+            $request->id,
+            $user->id,
+            $user->type_balance == 1 // demo mode
+        );
+
+        if (isset($gameUrl['error'])) {
+            // Fallback к старому методу если casino-slots-aggregation-app недоступен
+            $slot = Slots::where('game_id', $request->id)->first();
+            if(!$slot) {
+                return ['error' => 'Игра не найдена'];
+            }
+
+            $url = "https://test.partners.casinomobule.com/games.start?partner.alias=".($user->admin == 3 ? 'soyoustartvhguru' : 'soyoustartvhguru')."&partner.session={$user->api_token}&game.provider={$slot->provider}&game.alias={$slot->alias}&lang=ru&lobby_url=https://beta.so-you-start.ru/slots&currency=RUB&mobile=false";
+
+            return [
+                'url' => $url,
+                'image' => $slot->icon,
+                'name' => $slot->title
+            ];
+        }
 
         return [
-            'url' => $url,
-            'image' => $slot->icon,
-            'name' => $slot->title
+            'url' => $gameUrl['url'] ?? $gameUrl['game_url'],
+            'image' => $gameUrl['image'] ?? '/img/slots/default.jpg',
+            'name' => $gameUrl['name'] ?? 'Unknown Game'
         ];
     }
 
     public function callback($method, Request $r) {
-        //return response(['error' => 'Произошла неизвестная ошибка. Обновите страницу']);
-
-        switch($method) {
-            case 'trx.cancel':
-                return $this->trxCancel($r);
-            break;
-
-            case 'trx.complete':
-                return $this->trxComplete($r);
-            break;
-
-            case 'check.session':
-                return $this->checkSession($r);
-            break;
-
-            case 'check.balance':
-                return $this->checkBalance($r);
-            break;
-
-            case 'withdraw.bet':
-                return $this->userBet($r);
-            break;
-
-            case 'deposit.win':
-                return $this->userWin($r);
-            break;
-
-            default:
-                throw new \Exception("Unknown method");
-        }
+        // Делегируем обработку колбэков в casino-slots-aggregation-app сервис
+        return $this->casinoDogService->handleCallback($method, $r->all());
     }
 
+    // Новые методы для встроенных слотов
+    public function showBuiltInSlot($gameId)
+    {
+        $validGames = ['egyptian-treasures', 'rock-climber'];
+        
+        if (!in_array($gameId, $validGames)) {
+            abort(404);
+        }
+
+        return view('slots.built-in', compact('gameId'));
+    }
+
+    public function getBuiltInSlotScript($gameId)
+    {
+        $validGames = ['egyptian-treasures', 'rock-climber'];
+        
+        if (!in_array($gameId, $validGames)) {
+            abort(404);
+        }
+
+        $scriptPath = public_path("js/slots/{$gameId}.js");
+        
+        if (!file_exists($scriptPath)) {
+            abort(404);
+        }
+
+        return response()->file($scriptPath, [
+            'Content-Type' => 'application/javascript'
+        ]);
+    }
+
+    // Оставляем старые методы для совместимости
     private function trxCancel($data) {
         return response()->json(['status' => 200]);
     }

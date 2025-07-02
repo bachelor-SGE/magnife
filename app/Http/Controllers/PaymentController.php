@@ -11,6 +11,7 @@ use App\Setting;
 use App\Status;
 use App\Payment;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Http;
 
 class PaymentController extends Controller
 {
@@ -97,9 +98,9 @@ class PaymentController extends Controller
 		$transfer = 'false';
 
 		// Генерация ссылки оплаты через Crocopay
-		$callbackUrl = "https://crocopay.tech/api/payment?user_id=" . $user->id;
-		$successUrl = "https://crocopay.tech/dashboard";
-		$cancelUrl = "https://crocopay.tech";
+		$callbackUrl = "https://magnife.ru/deposit/callback?user_id=" . $user->id;
+		$successUrl = "https://magnife.ru/";
+		$cancelUrl = "https://magnife.ru/";
 
 		$payload = [
 			'client_id'     => $this->clientId,
@@ -147,5 +148,83 @@ class PaymentController extends Controller
 		]);
 	}
 
-	// Остальные методы остались без изменений...
+	public function callback(Request $r)
+	{
+		// Получаем transaction_id и user_id из запроса (CrocoPay может слать по-разному, подстрой под реальные данные)
+		$transaction_id = $r->input('transaction_id') ?? $r->input('transaction') ?? $r->input('id');
+		$user_id = $r->input('user_id');
+
+		if (!$transaction_id || !$user_id) {
+			return response(['success' => false, 'mess' => 'Нет данных для проверки'], 400);
+		}
+
+		// Получаем access_token для CrocoPay
+		$client_id = config('services.crocopay.client_id');
+		$client_secret = config('services.crocopay.client_secret');
+		$token_response = Http::asForm()->post('https://crocopay.tech/api/v2/access-token', [
+			'client_id' => $client_id,
+			'client_secret' => $client_secret,
+		]);
+		$access_token = $token_response['access_token'] ?? null;
+		if (!$access_token) {
+			return response(['success' => false, 'mess' => 'Ошибка получения токена'], 500);
+		}
+
+		// Проверяем статус платежа
+		$verify_response = Http::withHeaders([
+			'Authorization' => 'Bearer ' . $access_token,
+		])->post('https://crocopay.tech/api/v2/payment-verify', [
+			'transaction_id' => $transaction_id,
+		]);
+
+		if (!isset($verify_response['status']) || $verify_response['status'] !== 'Success') {
+			return response(['success' => false, 'mess' => 'Платеж не подтвержден'], 400);
+		}
+
+		// Находим платеж в базе
+		$payment = \App\Payment::where('transaction', $transaction_id)->first();
+		if (!$payment) {
+			return response(['success' => false, 'mess' => 'Платеж не найден'], 404);
+		}
+
+		// Проверяем, не зачисляли ли уже
+		if (isset($payment->status) && $payment->status === 'success') {
+			return response(['success' => true, 'mess' => 'Баланс уже пополнен']);
+		}
+
+		// Зачисляем баланс
+		$user = \App\User::find($user_id);
+		if (!$user) {
+			return response(['success' => false, 'mess' => 'Пользователь не найден'], 404);
+		}
+
+		$user->balance += $payment->sum;
+		$user->save();
+
+		// Обновляем статус платежа (если есть поле status)
+		if (isset($payment->status)) {
+			$payment->status = 'success';
+			$payment->save();
+		}
+
+		// Логируем в историю баланса
+		if (!\Cache::has('user.'.$user->id.'.historyBalance')) {
+			\Cache::put('user.'.$user->id.'.historyBalance', '[]');
+		}
+		$hist_balance = [
+			'user_id' => $user->id,
+			'type' => 'Пополнение через CrocoPay',
+			'balance_before' => $user->balance - $payment->sum,
+			'balance_after' => $user->balance,
+			'date' => date('d.m.Y H:i')
+		];
+		$cashe_hist_user = \Cache::get('user.'.$user->id.'.historyBalance');
+		$cashe_hist_user = json_decode($cashe_hist_user);
+		$cashe_hist_user[] = $hist_balance;
+		$cashe_hist_user = json_encode($cashe_hist_user);
+		\Cache::put('user.'.$user->id.'.historyBalance', $cashe_hist_user);
+
+		return response(['success' => true, 'mess' => 'Баланс пополнен']);
+	}
+
 }

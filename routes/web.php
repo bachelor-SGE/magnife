@@ -186,6 +186,10 @@ Route::group(['prefix' => 'slots'], function () {
     Route::any('/getGames', 'SlotsController@getGames');
     Route::any('/getUrl', 'SlotsController@getGameURI');
     Route::any('/callback/{method}', 'SlotsController@callback');
+    
+    // Новые маршруты для встроенных слотов
+    Route::get('/built-in/{gameId}', 'SlotsController@showBuiltInSlot')->name('slots.built-in');
+    Route::get('/built-in/{gameId}/script', 'SlotsController@getBuiltInSlotScript');
 });
 
 Route::post('/logout', function () {
@@ -196,3 +200,15 @@ Route::post('/logout', function () {
 Route::get('logout', 'Auth\LoginController@logout');
 Route::any('/tournier/{id}', 'GeneralController@tournier_page');
 Route::any('/{page?}', 'GeneralController@page')->name('home');
+
+Route::middleware('auth')->group(function() {
+    Route::get('/roulette/state', [App\Http\Controllers\RouletteController::class, 'state']);
+    Route::post('/roulette/bet', [App\Http\Controllers\RouletteController::class, 'bet']);
+    Route::post('/admin/roulette/rig', [App\Http\Controllers\RouletteController::class, 'adminRig'])->middleware('admin');
+    Route::post('/admin/roulette/finish', [App\Http\Controllers\RouletteController::class, 'finishRound'])->middleware('admin');
+});
+Route::view('/roulette', 'roulette');
+
+Route::get('/slots', function() {
+    return view('slots');
+});

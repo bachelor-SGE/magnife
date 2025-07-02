@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\Admin;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -30,9 +31,9 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
-
         parent::boot();
+        $router = $this->app['router'];
+        $router->aliasMiddleware('admin', Admin::class);
     }
 
     /**

@@ -478,23 +478,48 @@
 		}
 
 		function getSlotItem({ game_id, icon, title, provider }) {
+		    // Фейковый онлайн для каждой игры
+		    const online = Math.floor(Math.random() * 1000) + 1;
 		    return `
-		        <a class="slots_game" target="#" style="cursor: pointer;" onclick="openSlot(${game_id})">
+		        <a class="slots_game" target="#" style="cursor: pointer;" onclick="openSlot('${game_id}')">
 		            <img src="${icon}" />
 		            <div class="slot__animation__play">
 		            <svg class="icon"><use xlink:href="/images/symbols.svg?v=1#icon-play"></use></svg>
 		                <div class="slot__title">${title}</div>
 		                <div class="slot__titleProvider">${provider}</div>
+		                <div class="slot__online" data-game-id="${game_id}" style="color:#f2ac44;font-weight:700;font-size:15px;margin-top:8px;">👥 <span class="online-count">${online}</span> онлайн</div>
 		            </div>
 		        </a>
 		    `
 		}
+
+		// --- Фейковый онлайн ---
+		let fakeOnlineMap = {};
+		let fakeOnlineTotal = 0;
+		function updateFakeOnline() {
+		    fakeOnlineMap = {};
+		    fakeOnlineTotal = 0;
+		    $('.slot__online').each(function() {
+		        const gameId = $(this).data('game-id');
+		        const online = Math.floor(Math.random() * 1000) + 1;
+		        fakeOnlineMap[gameId] = online;
+		        fakeOnlineTotal += online;
+		        $(this).find('.online-count').text(online);
+		    });
+		    // Общий онлайн (пример: вставить в элемент с id="total-online")
+		    if($('#total-online').length) {
+		        $('#total-online').text(fakeOnlineTotal);
+		    }
+		}
+		setInterval(updateFakeOnline, 5000 + Math.random()*5000);
+		// --- end ---
 
 		function notFound() {
 		    return `<div class="slots--notFound">Ничего не найдено</div>`
 		}
 
 		function openSlot(id) {
+		    // Для обычных слотов используем старую логику
 		    $.post('/slots/getUrl', {
 		        _token: $('meta[name="csrf-token"]').attr("content"),
 		        id

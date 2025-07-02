@@ -1,44 +1,46 @@
-const app = require("express")(),
-fs = require("fs");
-var Redis = require('ioredis');
-var redis = new Redis();
-var RandomOrg = require('random-org');
-// const curl = new (require( 'curl-request' ))();
+const fs         = require('fs');
+const express    = require('express');
+const https      = require('https');
+const socketIo   = require('socket.io');
+const Redis      = require('ioredis');
+const redis      = new Redis();
+const RandomOrg  = require('random-org');
+const request    = require('request');
+const requestify = require('requestify');
+const mysql      = require('mysql');
+const util       = require('util');
+const crypto     = require('crypto');
+//const { curly }  = require('node-libcurl');
 
-const { curly } = require('node-libcurl')
+const domain = 'https://magnife.ru';
 
-var request = require('request');
-
-var requestify = require('requestify');
-domain = 'https://magnife.ru';
-
-var crypto = require('crypto'); 
-
-const mysql = require('mysql')
-const util = require('util')
-var client = mysql.createConnection({
+const client = mysql.createConnection({
     host: 'localhost',
     user: 'magnife_user',
     password: 'СильныйПароль123',
     database: 'magnife',
-});
-client.query = util.promisify(client.query);
-client.query("SET SESSION wait_timeout = 604800");
+  });
+  client.query = util.promisify(client.query);
+  client.query("SET SESSION wait_timeout = 604800");
+  
 
-const server = require("https").createServer({
-    key: fs.readFileSync('/etc/letsencrypt/live/magnife.ru/privkey.pem'),
-    cert: fs.readFileSync('/etc/letsencrypt/live/magnife.ru/fullchain.pem')
-}),
-io = require("socket.io")(server, {
-    cors: {
-        origin: "https://magnife.ru",
-        methods: ["GET", "POST"]
-    }
-});
+const app = express();
 
+const server = https.createServer({
+  key:  fs.readFileSync('/etc/letsencrypt/live/magnife.ru/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/magnife.ru/fullchain.pem')
+}, app);
+
+const io = socketIo(server, {
+  cors: {
+    origin: domain,
+    methods: ["GET","POST"],
+    credentials: true
+  }
+});
 
 server.listen(2083, () => {
-    console.log('server listen 2083');
+  console.log('✅ Node.js-сервер слушает https://0.0.0.0:2083');
 });
 
 usersOnline = [];
@@ -47,9 +49,9 @@ gamesOnline = [[],[],[],[],[],[],[],[],[]];
 io.on('connection', async (socket) => {
     console.log("🧲 Подключился клиент:", socket.id);
 
-    socket.onAny((event, ...args) => {
-        console.log("📥 Клиент отправил событие:", event, args);
-    });
+    //socket.onAny((event, ...args) => {
+    //    console.log("📥 Клиент отправил событие:", event, args);
+    //});
 
     socket.on('getUsersOnline', function() {
         socket.emit('usersOnline', usersOnline.length);
@@ -890,6 +892,9 @@ function startWheel(TIMER_WHEEL){
 
 
 // END WHEEL
+
+
+
 
 // X100
 
@@ -1782,6 +1787,58 @@ function startCrash() {
     var timer_crash = 10
     var preFinishCrash = false;
 
+    // Функция для генерации фейковых обновлений
+    function generateFakeUpdates() {
+        const fakeUsers = [
+            { name: 'Player_001', avatar: 'https://via.placeholder.com/40/FF6B6B/FFFFFF?text=1' },
+            { name: 'Lucky_Gamer', avatar: 'https://via.placeholder.com/40/4ECDC4/FFFFFF?text=L' },
+            { name: 'Winner_777', avatar: 'https://via.placeholder.com/40/45B7D1/FFFFFF?text=W' },
+            { name: 'Pro_Gamer', avatar: 'https://via.placeholder.com/40/96CEB4/FFFFFF?text=P' },
+            { name: 'Fortune_King', avatar: 'https://via.placeholder.com/40/FFEAA7/FFFFFF?text=F' },
+            { name: 'Crash_Master', avatar: 'https://via.placeholder.com/40/DDA0DD/FFFFFF?text=C' },
+            { name: 'Lucky_Star', avatar: 'https://via.placeholder.com/40/98D8C8/FFFFFF?text=S' },
+            { name: 'Big_Winner', avatar: 'https://via.placeholder.com/40/F7DC6F/FFFFFF?text=B' }
+        ];
+
+        const fakeBets = [10, 25, 50, 100, 250, 500, 1000, 2500];
+        const fakeCoeffs = [1.2, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 7.0, 10.0, 15.0, 25.0, 50.0];
+
+        setInterval(() => {
+            const randomUser = fakeUsers[Math.floor(Math.random() * fakeUsers.length)];
+            const randomBet = fakeBets[Math.floor(Math.random() * fakeBets.length)];
+            const randomCoeff = fakeCoeffs[Math.floor(Math.random() * fakeCoeffs.length)];
+            const randomWin = randomBet * randomCoeff;
+
+            const fakeUpdate = {
+                type: '2',
+                publishMassiv: [{
+                    user_id: Math.floor(Math.random() * 1000) + 1000,
+                    bet: randomBet,
+                    id: Date.now() + Math.floor(Math.random() * 1000),
+                    auto: randomCoeff,
+                    img: randomUser.avatar,
+                    login: randomUser.name
+                }]
+            };
+
+            io.sockets.emit('crashUpdate', fakeUpdate);
+
+            // Также отправляем уведомление о выигрыше
+            setTimeout(() => {
+                io.sockets.emit('crashNoty', {
+                    balanceLast: 1000,
+                    balanceNew: 1000 + randomWin,
+                    win: randomWin,
+                    user_id: Math.floor(Math.random() * 1000) + 1000
+                });
+            }, 1000);
+
+        }, 3000 + Math.random() * 5000); // Случайный интервал от 3 до 8 секунд
+    }
+
+    // Запускаем генерацию фейковых обновлений
+    generateFakeUpdates();
+
     var intervalStartCrash = setTimeout(async function start_crash() {
         timer_crash -= 1
         io.sockets.emit('crashTitle', {
@@ -2424,5 +2481,86 @@ function sendPromo() {
 }
 
 startPromoTimer()
+
+// Фейковая активность чата: раз в 3 секунды отправляем случайное сообщение из истории
+// const FAKE_CHAT_INTERVAL = 3000;
+// setInterval(async () => {
+//     try {
+//         const [msg] = await client.query(
+//             "SELECT id, content, autor, avatar, created_at FROM messages WHERE type_mess=0 AND hidden=0 ORDER BY RAND() LIMIT 1"
+//         );
+//         if (!msg) return;
+//         const fake = {
+//             type: "uploadMessage",
+//             id: msg.id,
+//             content: msg.content,
+//             autor: msg.autor,
+//             avatar: msg.avatar,
+//             created_at: msg.created_at
+//         };
+//         io.sockets.emit('laravel_database_mess', JSON.stringify(fake));
+//     } catch (e) {
+//         console.error('Fake chat error:', e);
+//     }
+// }, FAKE_CHAT_INTERVAL);
+
+// Фейковые фразы для чата
+const FAKE_CHAT_PHRASES = [
+    'Краш имба',
+    'Изи кес',
+    'Слоты просто жесть',
+    'Че как дела у кого?',
+    'Кто откуда?',
+    'Я из Воронежа',
+    'Я из Москвы',
+    'Ха ха москали',
+    'Всем привет',
+    'Погнали в краш',
+    'Кто что сегодня поднял?',
+    'Есть тут кто живой?',
+    'Слоты реально наваливают',
+    'Кто в холдеме?',
+    'Давайте промо',
+    'Го в коинфлип',
+    'Мины топ',
+    'Дай икс100',
+    'Кто ловил х1000?',
+    'Выпал бонус!',
+    'Сколько максимум ловили?'
+];
+const FAKE_CHAT_INTERVAL = 3000;
+setInterval(async () => {
+    try {
+        let fake;
+        // 25% шанс отправить свою фразу, иначе — из базы
+        if (Math.random() < 0.25) {
+            const phrase = FAKE_CHAT_PHRASES[Math.floor(Math.random() * FAKE_CHAT_PHRASES.length)];
+            fake = {
+                type: "uploadMessage",
+                id: Date.now(),
+                content: phrase,
+                autor: 'Гость',
+                avatar: '/images/avatars/default.png',
+                created_at: new Date().toISOString().slice(0, 19).replace('T', ' ')
+            };
+        } else {
+            const [msg] = await client.query(
+                "SELECT id, content, autor, avatar, created_at FROM messages WHERE type_mess=0 AND hidden=0 AND autor NOT LIKE '%Новый промокод%' ORDER BY RAND() LIMIT 1"
+            );
+            if (!msg) return;
+            fake = {
+                type: "uploadMessage",
+                id: msg.id,
+                content: msg.content,
+                autor: msg.autor,
+                avatar: msg.avatar,
+                created_at: msg.created_at
+            };
+        }
+        io.sockets.emit('laravel_database_mess', JSON.stringify(fake));
+    } catch (e) {
+        console.error('Fake chat error:', e);
+    }
+}, FAKE_CHAT_INTERVAL);
 
 

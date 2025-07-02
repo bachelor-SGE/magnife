@@ -1,0 +1,20 @@
+{
+  "files": {
+    "main.css": "/sloticon/static/css/main.c9da1b56.css",
+    "main.js": "/sloticon/static/js/main.ba32cd96.js",
+    "static/js/787.63f79d93.chunk.js": "/sloticon/static/js/787.63f79d93.chunk.js",
+    "static/media/ArchivoBlack-Regular.ttf": "/sloticon/static/media/ArchivoBlack-Regular.e35d38651492de9e7226.ttf",
+    "static/media/Google Sans.woff2": "/sloticon/static/media/Google Sans.e2c14dfc08530e88bfa6.woff2",
+    "static/media/egyptian-treasures-logo.png": "/sloticon/static/media/egyptian-treasures-logo.cfe1da3580ec1be5fd84.png",
+    "static/media/rock-climber-logo.png": "/sloticon/static/media/rock-climber-logo.1cc45278842bf9d8c729.png",
+    "static/media/Google Sans Greek.woff2": "/sloticon/static/media/Google Sans Greek.c797bd7c9bec02893291.woff2",
+    "index.html": "/sloticon/index.html",
+    "main.c9da1b56.css.map": "/sloticon/static/css/main.c9da1b56.css.map",
+    "main.ba32cd96.js.map": "/sloticon/static/js/main.ba32cd96.js.map",
+    "787.63f79d93.chunk.js.map": "/sloticon/static/js/787.63f79d93.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.c9da1b56.css",
+    "static/js/main.ba32cd96.js"
+  ]
+}

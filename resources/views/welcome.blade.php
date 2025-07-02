@@ -75,14 +75,15 @@
     </a>
 </div>
 
+<div id="total-online" style="color:#fff;font-size:18px;margin:10px 0 20px 0;"></div>
 <div class="games">
 
-    <!-- <a href="slots" class="games__item games__item--slots flare d-flex align-end">
+    <a href="slots" class="games__item games__item--slots flare d-flex align-end">
         <div class="games__item-text d-flex flex-column">
             <span>SLOTS</span>
             <p>? человек</p>
         </div>
-    </a> !-->
+    </a>
     <a href="shoot" class="games__item games__item--shoot flare d-flex align-end">
         <div class="games__item-text d-flex flex-column">
             <span>Crazy <br> Shoot</span>
@@ -201,16 +202,32 @@
     }
 
     function getRandomNumber(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+        return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    // После загрузки DOM выбираем все элементы <p> внутри классов .games__item-text
-    document.addEventListener("DOMContentLoaded", function() {
-        const elements = document.querySelectorAll('.games__item-text p');
-    elements.forEach(el => {
-      // Для каждого элемента генерируем случайное число от 1 до 568
-        const randomNumber = getRandomNumber(1, 568);
-         el.textContent = randomNumber + " человек";
-    });
-  });
+    const gameSelectors = [
+        '.games__item--slots .games__item-text p',
+        '.games__item--shoot .games__item-text p',
+        '.games__item--dice .games__item-text p',
+        '.games__item--mines .games__item-text p',
+        '.games__item--crash .games__item-text p',
+        '.games__item--coin .games__item-text p'
+    ];
+
+    function updateOnline() {
+        let total = 0;
+        gameSelectors.forEach(sel => {
+            const el = document.querySelector(sel);
+            if (el) {
+                const n = getRandomNumber(1, 1000);
+                el.textContent = n + ' человек';
+                total += n;
+            }
+        });
+        document.getElementById('total-online').textContent = 'Сейчас онлайн: ' + total;
+        if (window.$ && $('.online').length) $('.online').text(total);
+    }
+
+    setInterval(updateOnline, 5000);
+    updateOnline();
 </script>

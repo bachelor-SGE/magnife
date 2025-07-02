@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  # CasinoDog API сервер
+  casinodog-api:
+    image: php:8.1-fpm
+    container_name: casinodog-api
+    working_dir: /var/www/html
+    volumes:
+      - ./casinodog:/var/www/html
+      - ./logs:/var/log/casinodog
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - DB_CONNECTION=pgsql
+      - DB_HOST=casinodog-db
+      - DB_PORT=5432
+      - DB_DATABASE=casinodog
+      - DB_USERNAME=casinodog
+      - DB_PASSWORD=casinodog_password
+      - REDIS_HOST=casinodog-redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=your-jwt-secret-key
+      - CASINODOG_SALT=your-casinodog-salt
+    depends_on:
+      - casinodog-db
+      - casinodog-redis
+    networks:
+      - casinodog-bridge
+
+  # PostgreSQL база данных
+  casinodog-db:
+    image: postgres:13
+    container_name: casinodog-db
+    environment:
+      - POSTGRES_DB=casinodog
+      - POSTGRES_USER=casinodog
+      - POSTGRES_PASSWORD=casinodog_password
+    volumes:
+      - casinodog_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - casinodog-bridge
+
+  # Redis для кэширования
+  casinodog-redis:
+    image: redis:6-alpine
+    container_name: casinodog-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - casinodog_redis_data:/data
+    networks:
+      - casinodog-bridge
+
+  # Nginx для проксирования
+  casinodog-nginx:
+    image: nginx:alpine
+    container_name: casinodog-nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./casinodog:/var/www/html
+    depends_on:
+      - casinodog-api
+    networks:
+      - casinodog-bridge
+
+volumes:
+  casinodog_postgres_data:
+  casinodog_redis_data:
+
+networks:
+  casinodog-bridge:
+    driver: bridge 
